@@ -1,5 +1,11 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Image } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  ImageSourcePropType,
+} from "react-native";
 import * as ImagePicker from "expo-image-picker";
 
 const PlaceholderImage = require("./assets/images/background-image.png");
@@ -9,8 +15,16 @@ import Button from "./components/Button";
 import { useState } from "react";
 import IconButton from "./components/IconButton";
 import CircleButton from "./components/CircleButton";
+import EmojiPicker from "./components/EmojiPicker";
+import EmojiList from "./components/EmojiList";
+import EmojiSticker from "./components/EmojiSticker";
 
 export default function App() {
+  const [pickedEmoji, setPickedEmoji] = useState<ImageSourcePropType | null>(
+    null
+  );
+  const [isModelVisible, setIsModelVisible] = useState(false);
+
   const [showAppOptions, setShowAppOptions] = useState<boolean>(false);
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -34,7 +48,15 @@ export default function App() {
   };
 
   const onAddSticker = () => {
-    // we will implement this later
+    setIsModelVisible(true);
+  };
+
+  const onModelClose = () => {
+    setIsModelVisible(false);
+  };
+
+  const onEmojiSelect = (emoji: ImageSourcePropType) => {
+    setPickedEmoji(emoji);
   };
 
   const onSaveImageAsync = async () => {
@@ -43,11 +65,18 @@ export default function App() {
 
   return (
     <View style={styles.container}>
+      <EmojiPicker isVisible={isModelVisible} onClose={onModelClose}>
+        <EmojiList onSelect={onEmojiSelect} onCloseModal={onModelClose} />
+      </EmojiPicker>
+
       <View style={styles.imageContainer}>
         <ImageViewer
           placeholderImageSource={PlaceholderImage}
           selectedImage={selectedImage}
         />
+        {pickedEmoji !== null ? (
+          <EmojiSticker imageSize={40} stickerSource={pickedEmoji} />
+        ) : null}
       </View>
       {showAppOptions ? (
         <View style={styles.optionsContainer}>
