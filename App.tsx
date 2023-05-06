@@ -1,12 +1,7 @@
 import { StatusBar } from "expo-status-bar";
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  ImageSourcePropType,
-} from "react-native";
+import { StyleSheet, View, ImageSourcePropType } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const PlaceholderImage = require("./assets/images/background-image.png");
 
@@ -64,7 +59,7 @@ export default function App() {
   };
 
   return (
-    <View style={styles.container}>
+    <GestureHandlerRootView style={styles.container}>
       <EmojiPicker isVisible={isModelVisible} onClose={onModelClose}>
         <EmojiList onSelect={onEmojiSelect} onCloseModal={onModelClose} />
       </EmojiPicker>
@@ -104,7 +99,7 @@ export default function App() {
         </View>
       )}
       <StatusBar style="auto" />
-    </View>
+    </GestureHandlerRootView>
   );
 }
 
