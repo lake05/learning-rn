@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View, ImageSourcePropType } from "react-native";
+import { StyleSheet, View, ImageSourcePropType, Platform } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
@@ -7,14 +7,26 @@ const PlaceholderImage = require("./assets/images/background-image.png");
 
 import ImageViewer from "./components/ImageViewer";
 import Button from "./components/Button";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import IconButton from "./components/IconButton";
 import CircleButton from "./components/CircleButton";
 import EmojiPicker from "./components/EmojiPicker";
 import EmojiList from "./components/EmojiList";
 import EmojiSticker from "./components/EmojiSticker";
 
+import * as MediaLibrary from "expo-media-library";
+import { captureRef } from "react-native-view-shot";
+
+import domtoimage from "dom-to-image";
+
 export default function App() {
+  const imageRef = useRef<View | HTMLCanvasElement>(null);
+
+  const [status, requestPermission] = MediaLibrary.usePermissions();
+  if (status === null) {
+    requestPermission();
+  }
+
   const [pickedEmoji, setPickedEmoji] = useState<ImageSourcePropType | null>(
     null
   );
@@ -55,7 +67,35 @@ export default function App() {
   };
 
   const onSaveImageAsync = async () => {
-    // we will implement this later
+    if (Platform.OS !== "web") {
+      try {
+        const localUri = await captureRef(imageRef, {
+          height: 440,
+          quality: 1,
+        });
+
+        await MediaLibrary.saveToLibraryAsync(localUri);
+        if (localUri) {
+          alert("Saved!");
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      const dataUrl = await domtoimage.toJpeg(
+        imageRef.current as HTMLCanvasElement,
+        {
+          quality: 0.92,
+          width: 320,
+          height: 440,
+        }
+      );
+
+      let link = document.createElement("a");
+      link.download = "sticker-smash.jpeg";
+      link.href = dataUrl;
+      link.click();
+    }
   };
 
   return (
@@ -65,13 +105,15 @@ export default function App() {
       </EmojiPicker>
 
       <View style={styles.imageContainer}>
-        <ImageViewer
-          placeholderImageSource={PlaceholderImage}
-          selectedImage={selectedImage}
-        />
-        {pickedEmoji !== null ? (
-          <EmojiSticker imageSize={40} stickerSource={pickedEmoji} />
-        ) : null}
+        <View ref={imageRef} collapsable={false}>
+          <ImageViewer
+            placeholderImageSource={PlaceholderImage}
+            selectedImage={selectedImage}
+          />
+          {pickedEmoji !== null ? (
+            <EmojiSticker imageSize={40} stickerSource={pickedEmoji} />
+          ) : null}
+        </View>
       </View>
       {showAppOptions ? (
         <View style={styles.optionsContainer}>
