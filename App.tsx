@@ -19,8 +19,13 @@ import { captureRef } from "react-native-view-shot";
 
 import domtoimage from "dom-to-image";
 
+// import * as SplashScreen from "expo-splash-screen";
+
+// SplashScreen.preventAutoHideAsync();
+// setTimeout(SplashScreen.hideAsync, 3000);
+
 export default function App() {
-  const imageRef = useRef<View | HTMLCanvasElement>(null);
+  const imageRef = useRef<View>(null);
 
   const [status, requestPermission] = MediaLibrary.usePermissions();
   if (status === null) {
@@ -82,14 +87,11 @@ export default function App() {
         console.log(error);
       }
     } else {
-      const dataUrl = await domtoimage.toJpeg(
-        imageRef.current as HTMLCanvasElement,
-        {
-          quality: 0.92,
-          width: 320,
-          height: 440,
-        }
-      );
+      const dataUrl = await domtoimage.toJpeg(imageRef.current as any, {
+        quality: 0.92,
+        width: 320,
+        height: 440,
+      });
 
       let link = document.createElement("a");
       link.download = "sticker-smash.jpeg";
@@ -140,7 +142,7 @@ export default function App() {
           />
         </View>
       )}
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
     </GestureHandlerRootView>
   );
 }
